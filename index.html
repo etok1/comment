@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comment</title>
+    <link rel="stylesheet" href="./src/reset.css" />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <header class="header"></header>
+    <div class="container">
+      <aside class="container__sidebar"></aside>
+      <main class="container__main">
+        <section class="container__main content">
+          <div class="container__main content__small">
+            <div class="container__main content__small-cont"></div>
+            <div class="container__main content__small-cont"></div>
+            <div class="container__main content__small-cont"></div>
+            <div class="container__main content__small-cont"></div>
+            <div class="container__main content__small-cont"></div>
+            <div class="container__main content__small-cont"></div>
+          </div>
+          <div class="container__main content__big">
+            <div class="container__main content__big-cont"></div>
+          </div>
+        </section>
+        <section class="container__main comment">
+          <div class="comment__container">
+            <div class="comment__header">
+              <div class="comment__header-name">
+                <h1>Комментарии</h1>
+                <span class="amount-comment">(80)</span>
+              </div>
+              <div class="comment__header-name">
+                <h2>По количеству оценок</h2>
+                <span><img src="./src/assets/2.svg" alt="heart" /></span>
+              </div>
+              <div class="comment__header-name">
+                <h2>Избранное</h2>
+                <span><img src="./src/assets/heart.svg" alt="heart" /></span>
+              </div>
+            </div>
+            <div class="comment__user">
+              <img src="./src/assets/face1.png" alt="user" />
+              <div class="comment__user-input">
+                <div class="comment__user-name">
+                  <h1>Максим Авдеенко</h1>
+                  <span>Макс. 1000 символов</span>
+                </div>
+                <div class="comment__user-space">
+                  <input
+                    class="comment__input-form"
+                    type="text"
+                    placeholder="Введите текст сообщения..."
+                  />
+                  <button type="submit" class="comment__input-btn">
+                    Отправить
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="comment__other"></div>
+            <div class="comment__reply">
+              <img src="./src/assets/face1.png" alt="user" />
+              <div class="comment__reply-input">
+                <div class="comment__reply-name">
+                  <h1>Максим Авдеенко</h1>
+                  <span class="date"></span>
+                  <div class="comment__reply-names">
+                    <img src="./src/assets/4.svg" alt="reply" />
+                    <p>Максим Авдеенко</p>
+                  </div>
+                </div>
+                <div class="comment__reply-space">
+                  <h2>
+                    Самое обидное когда сценарий по сути есть - в виде книг, где
+                    нет сюжетных дыр, всё логично, стройное повествование и
+                    достаточно взять и экранизировать оригинал как это было в
+                    первых фильмах с минимальным количеством отсебятины и
+                    зритель с восторгом примет любой такой фильм и сериал,
+                    однако вместо этого 'Кольца власти' просто позаимствовали
+                    имена из оригинала, куски истории, мало связанные между
+                    собой и выдали очередной среднячковый сериал на один раз в
+                    лучшем случае.
+                  </h2>
+                  <div class="comment__reply-func">
+                    <div class="comment__reply-func-act">
+                      <img src="./src/assets/3.svg" alt="reply" />
+                      <p>В избранном</p>
+                    </div>
+                    <div class="comment__reply-func-act">
+                      <button class="comment__btn-minus">-</button>
+                      <span class="comment__count">0</span>
+                      <button class="comment__btn-plus">+</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./src/constants.js"></script>
+    <script src="./src/index.js"></script>
+  </body>
+</html>
