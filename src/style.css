@@ -248,12 +248,14 @@
 .comment__btn-minus {
   color: var(--red-color);
 }
-
 .comment__reply {
-  width: 85%;
-  margin-top: 50px;
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
+}
+.comment__reply-user {
+  width: 85%;
+  margin-top: 50px;
 }
 .comment__reply img {
   height: fit-content;
