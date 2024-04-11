@@ -155,6 +155,17 @@
   align-items: center;
 }
 
+.comment__other-name {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.comment__other-name span {
+  font-size: 14px;
+  color: var(--dark-grey-color);
+}
+
 .comment__user-name h1,
 .comment__other-name h1,
 .comment__reply-name h1 {
@@ -210,7 +221,7 @@
 }
 
 .comment__other-input {
-  width: 916px;
+  width: 880px;
 }
 
 .comment__other-space h2,

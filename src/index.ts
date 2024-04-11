@@ -4,6 +4,32 @@ interface User {
   imgUrl: string;
 }
 
+interface Comment {
+  text: string;
+  author: User;
+  rating: number;
+}
+
+class CommentClass {
+  text: string;
+  author: User;
+  rating: number;
+
+  constructor(text: string, author: User, rating: number) {
+    this.text = text;
+    this.author = author;
+    this.rating = rating;
+  }
+
+  increaseRating(): void {
+    this.rating++;
+  }
+
+  decreaseRating(): void {
+    this.rating--;
+  }
+}
+
 function changeFave(color: string): void {
   const changeFav = document.querySelector<SVGElement>(".comment__fav-change");
   if (changeFav) {
@@ -25,8 +51,10 @@ function changeFave(color: string): void {
 function renderUserComment(
   user: User,
   text: string,
+  date: string,
   inputCont: HTMLInputElement,
-  commentCont: HTMLElement
+  commentCont: HTMLElement,
+  arrObj: Comment[]
 ): void {
   let commentSection = document.createElement("div");
   commentSection.classList.add("comment__other-cont");
@@ -35,7 +63,7 @@ function renderUserComment(
     <div class="comment__other-input">
         <div class="comment__other-name">
             <h1>${user.name} ${user.surname}</h1>
-            <span class="date"></span>
+            <span class="date">${date}</span>
         </div>
         <div class="comment__other-space">
             <h2>
@@ -77,7 +105,20 @@ function renderUserComment(
   inputCont.value = "";
 }
 
+function formattedDate(date: Date): string {
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  const formattedDate = `${day}.${month} ${hours}:${minutes}`;
+
+  return formattedDate;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  const comments = [];
+
   const commentCont: HTMLElement | null =
     document.querySelector(".comment__other");
 
@@ -105,19 +146,34 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     data.forEach((item: any) => {
-      console.log(item.name.first);
+      const user = {
+        name: item.name.first,
+        surname: item.name.last,
+        imgUrl: item.picture.medium,
+      };
+
+      const comment = new CommentClass(item.text, user, item.rating);
+
+      console.log(user);
+
+      console.log(comment);
+
+      const commentDate = new Date(item.registered.date);
+      const formattedNow = formattedDate(commentDate);
+      console.log(formattedNow);
+
       let commentSection = document.createElement("div");
       commentSection.classList.add("comment__other-cont");
       commentSection.innerHTML = `
-          <img class="user__image" src="${item.picture.medium}" alt="user" />
+          <img class="user__image" src="${comment.author.imgUrl}" alt="user" />
           <div class="comment__other-input">
               <div class="comment__other-name">
-                  <h1>${item.name.first} ${item.name.last}</h1>
-                  <span class="date"></span>
+                  <h1>${comment.author.name} ${comment.author.surname}</h1>
+                  <span class="date">${formattedNow}</span>
               </div>
               <div class="comment__other-space">
                   <h2>
-                     hhoooooooooooooooooooooo
+                  Самое обидное когда сценарий по сути есть - в виде книг, где нет сюжетных дыр, всё логично, стройное повествование и достаточно взять и экранизировать оригинал как это было в первых фильмах с минимальным количеством отсебятины и зритель с восторгом примет любой такой фильм и сериал, однако вместо этого 'Кольца власти' просто позаимствовали имена из оригинала, куски истории, мало связанные между собой и выдали очередной среднячковый сериал на один раз в лучшем случае.
                   </h2>
                   <div class="comment__other-func">
                       <div class="comment__other-func-act">
@@ -152,48 +208,100 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>`;
 
       commentCont.appendChild(commentSection);
+
+      // localStorage.setItem("comments", JSON.stringify(comment));
+      // let getComment = localStorage.getItem("comments");
+      // console.log(getComment);
+
+      // const existingComments: Comment[] = JSON.parse(
+      //   localStorage.getItem("comments") || "[]"
+      // );
+
+      // existingComments.forEach((comment: Comment) => {
+      //   comments.push(comment);
+      // });
+
+      const minusBtn: HTMLElement | null = document.querySelector(
+        ".comment__btn-minus"
+      );
+      const plusBtn: HTMLElement | null =
+        document.querySelector(".comment__btn-plus");
+
+      const countSpan: HTMLElement | null =
+        document.querySelector(".comment__count");
+      let count: number = 0;
+
+      if (minusBtn && plusBtn && countSpan) {
+        minusBtn.addEventListener("click", () => {
+          comment.decreaseRating();
+          countSpan.textContent = comment.rating.toString();
+
+          if (count > 0) {
+            countSpan.style.color = "green";
+          } else if (count < 0) {
+            countSpan.style.color = "red";
+          } else {
+            countSpan.style.color = "black";
+          }
+        });
+        plusBtn.addEventListener("click", () => {
+          comment.increaseRating();
+          countSpan.textContent = comment.rating.toString();
+
+          if (count > 0) {
+            countSpan.style.color = "green";
+          } else if (count < 0) {
+            countSpan.style.color = "red";
+          } else {
+            countSpan.style.color = "black";
+          }
+        });
+      } else {
+        console.error("Buttons not found!");
+      }
+      changeFave("#a1a1a1");
     });
 
     // rating
-    const minusBtn: HTMLElement | null = document.querySelector(
-      ".comment__btn-minus"
-    );
-    const plusBtn: HTMLElement | null =
-      document.querySelector(".comment__btn-plus");
+    //   const minusBtn: HTMLElement | null = document.querySelector(
+    //     ".comment__btn-minus"
+    //   );
+    //   const plusBtn: HTMLElement | null =
+    //     document.querySelector(".comment__btn-plus");
 
-    const countSpan: HTMLElement | null =
-      document.querySelector(".comment__count");
-    let count: number = 0;
+    //   const countSpan: HTMLElement | null =
+    //     document.querySelector(".comment__count");
+    //   let count: number = 0;
 
-    if (minusBtn && plusBtn && countSpan) {
-      minusBtn.addEventListener("click", () => {
-        count -= 1;
-        console.log(count.toString());
-        countSpan.textContent = count.toString();
-        if (count > 0) {
-          countSpan.style.color = "green";
-        } else if (count < 0) {
-          countSpan.style.color = "red";
-        } else {
-          countSpan.style.color = "black";
-        }
-      });
-      plusBtn.addEventListener("click", () => {
-        count += 1;
-        console.log(count.toString());
-        countSpan.textContent = count.toString();
-        if (count > 0) {
-          countSpan.style.color = "green";
-        } else if (count < 0) {
-          countSpan.style.color = "red";
-        } else {
-          countSpan.style.color = "black";
-        }
-      });
-    } else {
-      console.error("Buttons not found!");
-    }
-    changeFave("#a1a1a1");
+    //   if (minusBtn && plusBtn && countSpan) {
+    //     minusBtn.addEventListener("click", () => {
+    //       count -= 1;
+    //       console.log(count.toString());
+    //       countSpan.textContent = count.toString();
+    //       if (count > 0) {
+    //         countSpan.style.color = "green";
+    //       } else if (count < 0) {
+    //         countSpan.style.color = "red";
+    //       } else {
+    //         countSpan.style.color = "black";
+    //       }
+    //     });
+    //     plusBtn.addEventListener("click", () => {
+    //       count += 1;
+    //       console.log(count.toString());
+    //       countSpan.textContent = count.toString();
+    //       if (count > 0) {
+    //         countSpan.style.color = "green";
+    //       } else if (count < 0) {
+    //         countSpan.style.color = "red";
+    //       } else {
+    //         countSpan.style.color = "black";
+    //       }
+    //     });
+    //   } else {
+    //     console.error("Buttons not found!");
+    //   }
+    //   changeFave("#a1a1a1");
   }
 
   renderData();
@@ -243,6 +351,9 @@ document.addEventListener("DOMContentLoaded", function () {
     imgUrl: "./src/assets/face1.png",
   };
 
+  const comment1 = new CommentClass("This is a great comment!", user, 0);
+  console.log(comment1);
+
   const userContInput: HTMLElement | null = document.querySelector(
     ".comment__user-name"
   );
@@ -265,6 +376,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const commentInput: HTMLInputElement | null = document.querySelector(
     ".comment__input-form"
   );
+
   const commentBtn: HTMLElement | null = document.querySelector(
     ".comment__input-btn"
   );
@@ -302,8 +414,17 @@ document.addEventListener("DOMContentLoaded", function () {
           const commentText = commentInput.value.trim();
           console.log(commentText);
           if (commentText !== "") {
+            const dateUser = new Date();
+            const formattedDateUser = formattedDate(dateUser);
             console.log(commentText);
-            renderUserComment(user, commentText, commentInput, commentCont);
+            renderUserComment(
+              user,
+              commentText,
+              formattedDateUser,
+              commentInput,
+              commentCont,
+              comments
+            );
           }
           console.log("Button is enabled. Performing action...");
         }
@@ -366,3 +487,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
+
+// function filterComment(category: string): void {
+//   let btns: NodeListOf<HTMLElement> = document.querySelectorAll(
+//     ".comment__menu-option"
+//   );
+// }
