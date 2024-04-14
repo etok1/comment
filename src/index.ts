@@ -8,17 +8,32 @@ interface Comment {
   text: string;
   author: User;
   rating: number;
+  isFav: boolean;
+}
+
+class UserClass {
+  name: string;
+  surname: string;
+  imgUrl: string;
+
+  constructor(name: string, surname: string, imgUrl: string) {
+    this.name = name;
+    this.surname = surname;
+    this.imgUrl = imgUrl;
+  }
 }
 
 class CommentClass {
   text: string;
   author: User;
   rating: number;
+  isFav: boolean;
 
-  constructor(text: string, author: User, rating: number) {
+  constructor(text: string, author: User, rating: number, isFav: boolean) {
     this.text = text;
     this.author = author;
     this.rating = rating;
+    this.isFav = false;
   }
 
   increaseRating(): void {
@@ -28,9 +43,22 @@ class CommentClass {
   decreaseRating(): void {
     this.rating--;
   }
+
+  toggleFav() {
+    if (this.isFav) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
 
-function changeFave(color: string): void {
+function toggleFavorite(comment: CommentClass) {
+  comment.toggleFav();
+  console.log("added to fav: " + comment.toggleFav());
+}
+
+function changeFave(color: string, comment: CommentClass | undefined): void {
   const changeFav = document.querySelector<SVGElement>(".comment__fav-change");
   if (changeFav) {
     const pathElement = changeFav.querySelector<SVGPathElement>("path");
@@ -39,6 +67,10 @@ function changeFave(color: string): void {
       changeFav.addEventListener("click", () => {
         console.log("hiiiiii i,, hrrte");
         pathElement.setAttribute("fill", color);
+        if (comment) {
+          toggleFavorite(comment);
+          console.log("right clicked");
+        }
       });
     } else {
       console.log("pathElement does not exist");
@@ -49,25 +81,24 @@ function changeFave(color: string): void {
 }
 
 function renderUserComment(
-  user: User,
-  text: string,
+  comment: CommentClass,
   date: string,
   inputCont: HTMLInputElement,
   commentCont: HTMLElement,
-  arrObj: Comment[]
+  btn: HTMLElement
 ): void {
   let commentSection = document.createElement("div");
   commentSection.classList.add("comment__other-cont");
   commentSection.innerHTML = `
-    <img src="${user.imgUrl}" alt="user" />
+    <img src="${comment.author.imgUrl}" alt="user" />
     <div class="comment__other-input">
         <div class="comment__other-name">
-            <h1>${user.name} ${user.surname}</h1>
+            <h1>${comment.author.name} ${comment.author.surname}</h1>
             <span class="date">${date}</span>
         </div>
         <div class="comment__other-space">
             <h2>
-               ${text}
+               ${comment.text}
             </h2>
             <div class="comment__other-func">
                 <div class="comment__other-func-act">
@@ -102,6 +133,8 @@ function renderUserComment(
     </div>`;
 
   commentCont.appendChild(commentSection);
+  btn.classList.remove("abled");
+  btn.classList.add("disabled");
   inputCont.value = "";
 }
 
@@ -117,7 +150,7 @@ function formattedDate(date: Date): string {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const comments = [];
+  const comments: CommentClass[] = [];
 
   const commentCont: HTMLElement | null =
     document.querySelector(".comment__other");
@@ -146,13 +179,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     data.forEach((item: any) => {
-      const user = {
-        name: item.name.first,
-        surname: item.name.last,
-        imgUrl: item.picture.medium,
-      };
+      const user = new UserClass(
+        item.name.first,
+        item.name.last,
+        item.picture.medium
+      );
 
-      const comment = new CommentClass(item.text, user, item.rating);
+      const text =
+        "Самое обидное когда сценарий по сути есть - в виде книг, где нет сюжетных дыр, всё логично, стройное повествование и достаточно взять и экранизировать оригинал как это было в первых фильмах с минимальным количеством отсебятины и зритель с восторгом примет любой такой фильм и сериал, однако вместо этого 'Кольца власти' просто позаимствовали имена из оригинала, куски истории, мало связанные между собой и выдали очередной среднячковый сериал на один раз в лучшем случае.";
+
+      const comment: CommentClass = new CommentClass(item.text, user, 0, false);
 
       console.log(user);
 
@@ -173,7 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
               </div>
               <div class="comment__other-space">
                   <h2>
-                  Самое обидное когда сценарий по сути есть - в виде книг, где нет сюжетных дыр, всё логично, стройное повествование и достаточно взять и экранизировать оригинал как это было в первых фильмах с минимальным количеством отсебятины и зритель с восторгом примет любой такой фильм и сериал, однако вместо этого 'Кольца власти' просто позаимствовали имена из оригинала, куски истории, мало связанные между собой и выдали очередной среднячковый сериал на один раз в лучшем случае.
+                  ${text}
                   </h2>
                   <div class="comment__other-func">
                       <div class="comment__other-func-act">
@@ -209,9 +245,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
       commentCont.appendChild(commentSection);
 
-      // localStorage.setItem("comments", JSON.stringify(comment));
-      // let getComment = localStorage.getItem("comments");
-      // console.log(getComment);
+      comments.push(comment);
+      console.log(comments);
+      let savedComments = localStorage.setItem(
+        "comments",
+        JSON.stringify(comments)
+      );
+      console.log(savedComments);
 
       // const existingComments: Comment[] = JSON.parse(
       //   localStorage.getItem("comments") || "[]"
@@ -236,9 +276,9 @@ document.addEventListener("DOMContentLoaded", function () {
           comment.decreaseRating();
           countSpan.textContent = comment.rating.toString();
 
-          if (count > 0) {
+          if (comment.rating > 0) {
             countSpan.style.color = "green";
-          } else if (count < 0) {
+          } else if (comment.rating < 0) {
             countSpan.style.color = "red";
           } else {
             countSpan.style.color = "black";
@@ -248,9 +288,9 @@ document.addEventListener("DOMContentLoaded", function () {
           comment.increaseRating();
           countSpan.textContent = comment.rating.toString();
 
-          if (count > 0) {
+          if (comment.rating > 0) {
             countSpan.style.color = "green";
-          } else if (count < 0) {
+          } else if (comment.rating < 0) {
             countSpan.style.color = "red";
           } else {
             countSpan.style.color = "black";
@@ -259,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         console.error("Buttons not found!");
       }
-      changeFave("#a1a1a1");
+      changeFave("#a1a1a1", comment);
     });
 
     // rating
@@ -351,9 +391,6 @@ document.addEventListener("DOMContentLoaded", function () {
     imgUrl: "./src/assets/face1.png",
   };
 
-  const comment1 = new CommentClass("This is a great comment!", user, 0);
-  console.log(comment1);
-
   const userContInput: HTMLElement | null = document.querySelector(
     ".comment__user-name"
   );
@@ -416,20 +453,33 @@ document.addEventListener("DOMContentLoaded", function () {
           if (commentText !== "") {
             const dateUser = new Date();
             const formattedDateUser = formattedDate(dateUser);
+            const newComment: CommentClass = new CommentClass(
+              commentText,
+              user,
+              0,
+              false
+            );
             console.log(commentText);
             renderUserComment(
-              user,
-              commentText,
+              newComment,
               formattedDateUser,
               commentInput,
               commentCont,
-              comments
+              commentBtn
             );
+            comments.push(newComment);
+            console.log(comments);
+            changeFave("#a1a1a1", newComment);
+            let savedComments = localStorage.setItem(
+              "comments",
+              JSON.stringify(comments)
+            );
+            console.log(savedComments);
           }
           console.log("Button is enabled. Performing action...");
         }
       });
-      changeFave("#a1a1a1");
+
       //reply user
       const replyCont: HTMLInputElement | null = document.querySelector(
         ".comment__reply-user"
@@ -486,6 +536,11 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   }
+
+  console.log(comments);
+
+  let getComment = localStorage.getItem("comments");
+  console.log(getComment + "from local storage");
 });
 
 // function filterComment(category: string): void {
