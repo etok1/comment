@@ -136,10 +136,26 @@
 }
 
 .comment__user img,
-.comment__other img,
 .comment__reply img {
   height: fit-content;
   align-self: flex-start;
+}
+
+.comment__img {
+  align-self: flex-start;
+  border-radius: 50%;
+  width: 61px;
+  height: 61px;
+}
+
+.comment__other-cont {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment__other-image {
+  display: flex;
+  flex-direction: row;
 }
 
 .comment__user-input,
@@ -153,6 +169,10 @@
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.comment__other-func-act {
+  cursor: pointer;
 }
 
 .comment__other-name {

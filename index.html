@@ -55,10 +55,18 @@
                     </div>
                   </div>
                   <ul class="comment__menu">
-                    <li class="comment__menu-option active">По дате</li>
-                    <li class="comment__menu-option">По количеству оценок</li>
-                    <li class="comment__menu-option">По актуальности</li>
-                    <li class="comment__menu-option">По количеству ответов</li>
+                    <li class="comment__menu-option active" data-filter="date">
+                      По дате
+                    </li>
+                    <li class="comment__menu-option" data-filter="rating">
+                      По количеству оценок
+                    </li>
+                    <li class="comment__menu-option" data-filter="relevance">
+                      По актуальности
+                    </li>
+                    <li class="comment__menu-option" data-filter="replies">
+                      По количеству ответов
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -91,43 +99,7 @@
             <div class="comment__other"></div>
             <!-- reply container -->
             <!-- <div class="comment__reply-user">
-              <div class="comment__reply">
-                <img src="./src/assets/face1.png" alt="user" />
-                <div class="comment__reply-input">
-                  <div class="comment__reply-name">
-                    <h1>Максим Авдеенко</h1>
-                    <span class="date"></span>
-                    <div class="comment__reply-names">
-                      <img src="./src/assets/4.svg" alt="reply" />
-                      <p>Максим Авдеенко</p>
-                    </div>
-                  </div>
-                  <div class="comment__reply-space">
-                    <h2>
-                      Самое обидное когда сценарий по сути есть - в виде книг,
-                      где нет сюжетных дыр, всё логично, стройное повествование
-                      и достаточно взять и экранизировать оригинал как это было
-                      в первых фильмах с минимальным количеством отсебятины и
-                      зритель с восторгом примет любой такой фильм и сериал,
-                      однако вместо этого 'Кольца власти' просто позаимствовали
-                      имена из оригинала, куски истории, мало связанные между
-                      собой и выдали очередной среднячковый сериал на один раз в
-                      лучшем случае.
-                    </h2>
-                    <div class="comment__reply-func">
-                      <div class="comment__reply-func-act">
-                        <img src="./src/assets/3.svg" alt="reply" />
-                        <p>В избранном</p>
-                      </div>
-                      <div class="comment__reply-func-act">
-                        <button class="comment__btn-minus">-</button>
-                        <span class="comment__count">0</span>
-                        <button class="comment__btn-plus">+</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              
             </div> -->
           </div>
         </section>
