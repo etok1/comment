@@ -240,6 +240,10 @@
   cursor: pointer;
 }
 
+.comment__reply-user {
+  display: none;
+}
+
 .comment__other-input {
   width: 880px;
 }
