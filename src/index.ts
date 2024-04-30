@@ -101,49 +101,99 @@ function toggleFavorite(comment: CommentClass) {
 function changeFave(
   color: string,
   comment: CommentClass | undefined,
+  container: HTMLElement | null,
   array: Array<CommentClass>
 ): void {
-  const changeFav = document.querySelector<SVGElement>(".comment__fav-change");
-  if (changeFav) {
-    const pathElement = changeFav.querySelector<SVGPathElement>("path");
-
-    if (pathElement) {
-      changeFav.addEventListener("click", () => {
-        console.log(pathElement.getAttribute("fill"));
-        if (pathElement.getAttribute("fill") === "white") {
-          console.log("hiiiiii i,, hrrte");
-          pathElement.setAttribute("fill", color);
+  if (comment && container) {
+    const changeFav = container.querySelector<SVGElement>(
+      ".comment__fav-change"
+    );
+    if (changeFav) {
+      const pathElement = changeFav.querySelector<SVGPathElement>("path");
+      if (pathElement) {
+        changeFav.addEventListener("click", () => {
           console.log(pathElement.getAttribute("fill"));
-          if (comment) {
-            let newFavState = comment.toggleFav();
-            console.log("right clicked " + newFavState);
-            const getValue: string | null = localStorage.getItem("comments");
-            if (getValue) {
-              const changeValues = JSON.parse(getValue);
-              console.log(changeValues);
-              changeValues.forEach((changeValue) => {
-                if (changeValue.author.name === comment.author.name) {
-                  changeValue.isFav = true;
-                  console.log(changeValue.isFav);
-                }
-              });
-              localStorage.setItem("comments", JSON.stringify(array));
+          if (pathElement.getAttribute("fill") === "white") {
+            console.log("hiiiiii i,, hrrte");
+            pathElement.setAttribute("fill", color);
+            console.log(pathElement.getAttribute("fill"));
+            if (comment) {
+              let newFavState = comment.toggleFav();
+              console.log("right clicked " + newFavState);
+              const getValue: string | null = localStorage.getItem("comments");
+              if (getValue) {
+                const changeValues = JSON.parse(getValue);
+                console.log(changeValues);
+                changeValues.forEach((changeValue) => {
+                  if (changeValue.author.name === comment.author.name) {
+                    changeValue.isFav = true;
+                    console.log(changeValue.isFav);
+                  }
+                });
+                localStorage.setItem("comments", JSON.stringify(array));
+              }
+            }
+          } else {
+            pathElement.getAttribute("fill");
+            pathElement.setAttribute("fill", "white");
+            if (comment) {
+              let newFavState = comment.toggleFav();
+              console.log("right clicked " + newFavState);
+              const getValue: string | null = localStorage.getItem("comments");
+              if (getValue) {
+                const changeValues = JSON.parse(getValue);
+                console.log(changeValues);
+                changeValues.forEach((changeValue) => {
+                  if (changeValue.author.name === comment.author.name) {
+                    changeValue.isFav = false;
+                    console.log(changeValue.isFav);
+                  }
+                });
+                localStorage.setItem("comments", JSON.stringify(array));
+              }
             }
           }
-        } else {
-          pathElement.getAttribute("fill");
-          pathElement.setAttribute("fill", "white");
-          if (comment) {
-            let newFavState = comment.toggleFav();
-            console.log("another clicked " + newFavState);
-          }
-        }
-      });
+        });
+      } else {
+        console.log("pathElement does not exist");
+      }
     } else {
-      console.log("pathElement does not exist");
+      console.log("changeFav does not exist");
     }
+  }
+}
+
+function changeAmount() {
+  const numberOfComm = document.querySelector(".amount-comment");
+  if (numberOfComm) {
+    let amount = comments.length;
+    numberOfComm.innerHTML = amount.toString();
+  }
+}
+
+function rating(comment: CommentClass, container: HTMLElement) {
+  const minusBtn: HTMLButtonElement | null = container.querySelector(
+    ".comment__btn-minus"
+  );
+  const plusBtn: HTMLButtonElement | null =
+    container.querySelector(".comment__btn-plus");
+
+  const countSpan: HTMLElement | null =
+    container.querySelector(".comment__count");
+
+  if (minusBtn && plusBtn && countSpan) {
+    minusBtn.addEventListener("click", () => {
+      comment.decreaseRating();
+      updateRatingDisplay(comment, countSpan);
+      minusBtn.disabled = true;
+    });
+    plusBtn.addEventListener("click", () => {
+      comment.increaseRating();
+      updateRatingDisplay(comment, countSpan);
+      plusBtn.disabled = true;
+    });
   } else {
-    console.log("changeFav does not exist");
+    console.error("Buttons not found!");
   }
 }
 
@@ -242,6 +292,12 @@ function renderUserComment(
 
   commentCont.appendChild(commentSection);
 
+  changeFave("#a1a1a1", comment, commentSection, comments);
+
+  rating(comment, commentSection);
+  localStorage.setItem("comments", JSON.stringify(comments));
+
+  console.log(commentCont);
   btn.classList.remove("abled");
   btn.classList.add("disabled");
   inputCont.value = "";
@@ -257,34 +313,6 @@ function formattedDate(date: Date): string {
 
   return formattedDate;
 }
-
-// function filterComment(category, commentArray: Array<CommentClass>) {
-//   const AllComments: NodeListOf<Element> = document.querySelectorAll(
-//     ".comment__other-cont"
-//   );
-
-//   // Clear existing comments from the container
-//   const commentContainer = document.querySelector(".comment__other");
-//   commentContainer.innerHTML = "";
-
-//   // Append sorted comments back to the container
-//   commentsArray.forEach((comment) => {
-//     commentContainer.appendChild(comment);
-//   });
-
-//   //   const menuOptions = document.querySelectorAll('.comment__menu-option');
-//   // menuOptions.forEach(option => {
-//   //   option.addEventListener('click', () => {
-//   //     // Remove 'active' class from all options
-//   //     menuOptions.forEach(opt => opt.classList.remove('active'));
-//   //     // Add 'active' class to the clicked option
-//   //     option.classList.add('active');
-//   //     // Get the data-filter attribute to determine the sorting criteria
-//   //     const filterCriteria = option.getAttribute('data-filter');
-//   //     // Filter comments based on the selected criteria
-//   //     filterComments(filterCriteria);
-//   //   });
-// }
 
 function renderReply(
   comment: CommentClass,
@@ -381,12 +409,14 @@ async function renderData() {
       0
     );
     comments.push(comment);
+    changeAmount();
 
     console.log(comment);
     const commentSection = renderComment(comment);
     if (commentSection) {
       commentCont.appendChild(commentSection);
-      changeFave("#a1a1a1", comment, comments);
+      changeFave("#a1a1a1", comment, commentSection, comments);
+      rating(comment, commentSection);
     }
 
     console.log(comments);
@@ -480,31 +510,17 @@ function renderComment(comment: CommentClass): HTMLElement | null {
 <div class="comment__reply-user"></div>
             `;
 
-  const minusBtn: HTMLElement | null = document.querySelector(
-    ".comment__btn-minus"
-  );
-  const plusBtn: HTMLElement | null =
-    document.querySelector(".comment__btn-plus");
-
-  const countSpan: HTMLElement | null =
-    document.querySelector(".comment__count");
-
-  if (minusBtn && plusBtn && countSpan) {
-    minusBtn.addEventListener("click", () => {
-      comment.decreaseRating();
-      updateRatingDisplay(comment, countSpan);
-    });
-    plusBtn.addEventListener("click", () => {
-      comment.increaseRating();
-      updateRatingDisplay(comment, countSpan);
-    });
-  } else {
-    console.error("Buttons not found!");
-  }
   return commentSection;
 }
 
 function userCommenting(user) {
+  if (userContInput) {
+    if (userImage && userName) {
+      userImage.setAttribute("src", user.imgUrl);
+      console.log(userImage);
+      userName.innerText = user.name + " " + user.surname;
+    }
+  }
   if (commentCont) {
     if (commentInput && commentBtn) {
       commentInput.addEventListener("input", function () {
@@ -557,35 +573,15 @@ function userCommenting(user) {
             );
 
             comments.push(newComment);
-            const minusBtn: HTMLElement | null = document.querySelector(
-              ".comment__btn-minus"
-            );
-            const plusBtn: HTMLElement | null =
-              document.querySelector(".comment__btn-plus");
-
-            const countSpan: HTMLElement | null =
-              document.querySelector(".comment__count");
-
-            if (minusBtn && plusBtn && countSpan) {
-              minusBtn.addEventListener("click", () => {
-                newComment.decreaseRating();
-                updateRatingDisplay(newComment, countSpan);
-              });
-              plusBtn.addEventListener("click", () => {
-                newComment.increaseRating();
-                updateRatingDisplay(newComment, countSpan);
-              });
-            } else {
-              console.error("Buttons not found!");
-            }
-            changeFave("#a1a1a1", newComment, comments);
-            console.log(comments);
-
+            const newDate = new Date(newComment.date);
+            console.log(newDate);
+            changeAmount();
             let savedComments = localStorage.setItem(
               "comments",
               JSON.stringify(comments)
             );
             console.log(savedComments);
+            console.log(comments);
           }
           console.log("Button is enabled. Performing action...");
         }
@@ -594,11 +590,87 @@ function userCommenting(user) {
   }
 }
 
-function renderUserComment(
-  comment: CommentClass,
-  date: string,
-  commentCont: HTMLElement
-) {}
+function dateFilter() {
+  if (!commentCont || !Array.isArray(comments)) {
+    console.warn(
+      "Invalid comment container or comments array:",
+      commentCont,
+      comments
+    );
+    return;
+  }
+  if (commentCont) {
+    comments.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+
+      return dateB.getTime() - dateA.getTime();
+    });
+    commentCont.innerHTML = "";
+    console.log(comments + "hope it works");
+    comments.forEach((comment) => {
+      renderComment(comment);
+      console.log(comment);
+    });
+  }
+}
+
+function dropdownFilter() {
+  const select: HTMLElement = <HTMLElement>(
+    document.querySelector(".comment__select")
+  );
+  const arrow: HTMLElement = <HTMLElement>document.querySelector(".arrow");
+
+  const menu: HTMLElement = <HTMLElement>(
+    document.querySelector(".comment__menu")!
+  );
+
+  const options = document.querySelectorAll(
+    ".comment__menu li"
+  ) as NodeListOf<HTMLElement>;
+
+  const selected: HTMLElement = <HTMLElement>(
+    document.querySelector(".comment__selected")
+  );
+
+  select.addEventListener("click", () => {
+    select.classList.toggle("select-clicked");
+    arrow.classList.toggle("arrow-rotate");
+    menu.classList.toggle("comment__menu-open");
+  });
+
+  options.forEach((option) => {
+    option.addEventListener("click", () => {
+      selected.innerText = option.innerText;
+      select.classList.remove("select-clicked");
+      arrow.classList.remove("arrow-rotate");
+      menu.classList.remove("comment__menu-open");
+
+      options.forEach((option) => {
+        option.classList.remove("active");
+      });
+      option.classList.add("active");
+    });
+  });
+}
+
+function filtering() {
+  const menuOptions = document.querySelectorAll(".comment__menu-option");
+  menuOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+      const filterType = option.getAttribute("data-filter");
+      if (filterType === "date") {
+        console.log("date filter");
+        dateFilter();
+      } else if (filterType === "rating") {
+        console.log("rating");
+      } else if (filterType === "replies") {
+        console.log("replies");
+      }
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const user: User = {
     name: "John",
@@ -606,35 +678,24 @@ document.addEventListener("DOMContentLoaded", function () {
     imgUrl: "./src/assets/face1.png",
   };
 
-  const numberOfComm = document.querySelector(".amount-comment");
-  // everything
-
   renderData();
 
   userCommenting(user);
-
+  dropdownFilter();
+  filtering();
   setTimeout(() => {
-    const savedComments = localStorage.setItem(
-      "comments",
-      JSON.stringify(comments)
-    );
-
-    console.log(localStorage.getItem("comments"));
+    localStorage.setItem("comments", JSON.stringify(comments));
+    console.log(comments.length);
 
     const commentsFromLocalStorage = localStorage.getItem("comments");
 
     if (commentsFromLocalStorage) {
       const commentsSaved = JSON.parse(commentsFromLocalStorage);
 
-      comments.forEach((comment) => {
+      commentsSaved.forEach((comment) => {
         console.log(comment);
         renderComment(comment);
-        changeFave("#a1a1a1", comment, comments);
       });
     }
   }, 1000);
 });
-
-// comments.forEach((comment) => {
-//   changeFave("#a1a1a1", comment, comments);
-// });
