@@ -190,7 +190,7 @@ function formattedDate(date) {
 }
 function renderReply(comment, date, inputCont, commentCont, btn) {
     if (!commentCont || !inputCont || !btn) {
-        console.warn("Invalid comment container, input element, or button:", commentCont, inputCont, btn);
+        console.error("Invalid comment container", commentCont, inputCont, btn);
         return;
     }
     commentCont.addEventListener("click", function (event) {
@@ -207,24 +207,22 @@ function renderReply(comment, date, inputCont, commentCont, btn) {
     });
 }
 function replyBtnTarget(user) {
-    document.addEventListener("DOMContentLoaded", function () {
-        var replyBtn = document.querySelector(".comment__reply-btn");
-        var commentInput = document.querySelector(".comment__input");
-        var parentDiv = document.querySelector(".comment__other-cont");
-        var commentBtn = document.querySelector(".comment__btn");
-        if (!replyBtn || !commentInput || !parentDiv || !commentBtn) {
-            console.warn("Reply button or input elements not found:", replyBtn, commentInput, parentDiv, commentBtn);
-            return;
-        }
-        if (replyBtn && commentInput && parentDiv && commentBtn) {
-            replyBtn.addEventListener("click", function () {
-                console.log("replybtn clicked");
-                var commentDate = new Date();
-                var formattedNow = formattedDate(commentDate);
-                renderReply(user, formattedNow, commentInput, parentDiv, commentBtn);
-            });
-        }
-    });
+    var commentInput = document.querySelector(".comment__input");
+    var parentDiv = document.querySelector(".comment__other-cont");
+    var replyBtn = parentDiv.querySelector(".comment__reply-btn");
+    var commentBtn = document.querySelector(".comment__btn");
+    if (!replyBtn || !commentInput || !parentDiv || !commentBtn) {
+        console.warn("Reply button or input elements not found:", replyBtn, commentInput, parentDiv, commentBtn);
+        return;
+    }
+    if (replyBtn && commentInput && parentDiv && commentBtn) {
+        replyBtn.addEventListener("click", function () {
+            console.log("replybtn clicked");
+            var commentDate = new Date();
+            var formattedNow = formattedDate(commentDate);
+            renderReply(user, formattedNow, commentInput, parentDiv, commentBtn);
+        });
+    }
 }
 function updateRatingDisplay(comment, countSpan) {
     countSpan.textContent = comment.rating.toString();
@@ -350,6 +348,7 @@ function userCommenting(user) {
                         var formattedDateUser = formattedDate(dateUser);
                         var newComment = new CommentClass(commentText, user, 0, formattedDateUser, false, 0);
                         renderUserComment(newComment, formattedDateUser, commentInput, commentCont, commentBtn);
+                        replyBtnTarget(newComment);
                         comments.push(newComment);
                         var newDate = new Date(newComment.date);
                         console.log(newDate);

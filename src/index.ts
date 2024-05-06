@@ -367,36 +367,34 @@ function renderReply(
 }
 
 function replyBtnTarget(user: CommentClass) {
-  document.addEventListener("DOMContentLoaded", () => {
-    const replyBtn = document.querySelector(".comment__reply-btn");
-    const commentInput = document.querySelector(
-      ".comment__input"
-    ) as HTMLInputElement;
-    const parentDiv = document.querySelector(
-      ".comment__other-cont"
-    ) as HTMLElement;
-    const commentBtn = document.querySelector(".comment__btn") as HTMLElement;
+  const commentInput = document.querySelector(
+    ".comment__input"
+  ) as HTMLInputElement;
+  const parentDiv = document.querySelector(
+    ".comment__other-cont"
+  ) as HTMLElement;
+  const replyBtn = parentDiv.querySelector(".comment__reply-btn");
+  const commentBtn = document.querySelector(".comment__btn") as HTMLElement;
 
-    if (!replyBtn || !commentInput || !parentDiv || !commentBtn) {
-      console.warn(
-        "Reply button or input elements not found:",
-        replyBtn,
-        commentInput,
-        parentDiv,
-        commentBtn
-      );
-      return;
-    }
+  if (!replyBtn || !commentInput || !parentDiv || !commentBtn) {
+    console.warn(
+      "Reply button or input elements not found:",
+      replyBtn,
+      commentInput,
+      parentDiv,
+      commentBtn
+    );
+    return;
+  }
 
-    if (replyBtn && commentInput && parentDiv && commentBtn) {
-      replyBtn.addEventListener("click", () => {
-        console.log("replybtn clicked");
-        const commentDate = new Date();
-        const formattedNow = formattedDate(commentDate);
-        renderReply(user, formattedNow, commentInput, parentDiv, commentBtn);
-      });
-    }
-  });
+  if (replyBtn && commentInput && parentDiv && commentBtn) {
+    replyBtn.addEventListener("click", () => {
+      console.log("replybtn clicked");
+      const commentDate = new Date();
+      const formattedNow = formattedDate(commentDate);
+      renderReply(user, formattedNow, commentInput, parentDiv, commentBtn);
+    });
+  }
 }
 
 function updateRatingDisplay(comment, countSpan) {
@@ -614,7 +612,7 @@ function userCommenting(user) {
               commentCont,
               commentBtn
             );
-
+            replyBtnTarget(newComment);
             comments.push(newComment);
             const newDate = new Date(newComment.date);
             console.log(newDate);
