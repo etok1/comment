@@ -73,6 +73,10 @@ const comments: CommentClass[] = [];
 const commentCont: HTMLElement | null =
   document.querySelector(".comment__other");
 
+const parentDiv: HTMLElement | null = document.querySelector(
+  ".comment__other-cont"
+);
+
 const text =
   "Самое обидное когда сценарий по сути есть - в виде книг, где нет сюжетных дыр, всё логично, стройное повествование и достаточно взять и экранизировать оригинал как это было в первых фильмах с минимальным количеством отсебятины и зритель с восторгом примет любой такой фильм и сериал, однако вместо этого 'Кольца власти' просто позаимствовали имена из оригинала, куски истории, мало связанные между собой и выдали очередной среднячковый сериал на один раз в лучшем случае.";
 const userContInput: HTMLElement | null = document.querySelector(
@@ -321,40 +325,78 @@ function renderReply(
   commentCont: HTMLElement,
   btn: HTMLElement
 ): void {
-  let commentSection = document.createElement("div");
-  commentSection.classList.add("comment__reply");
-  commentSection.innerHTML = `
+  if (!commentCont || !inputCont || !btn) {
+    console.error("Invalid comment container", commentCont, inputCont, btn);
+    return;
+  }
 
-    <img src="${comment.author.imgUrl}" alt="reply" />
-    <div class="comment__reply-input">
-      <div class="comment__reply-name">
-        <h1>${comment.author.name} ${comment.author.surname}</h1>
-        <span class="date">${date}</span>
-        <div class="comment__reply-names">
-          <img src="./src/assets/4.svg" alt="reply" />
-          <p>Максим Авдеенко</p>
-        </div>
-      </div>
-        <div class="comment__reply-space">
-          <h2>
-            ${inputCont}
-          </h2>
-          <div class="comment__reply-func">
-            <div class="comment__reply-func-act">
-              <button class="comment__btn-minus">-</button>
-              <span class="comment__count">0</span>
-              <button class="comment__btn-plus">+</button>
+  commentCont.addEventListener("click", function (event) {
+    const targetElement = event.target as HTMLElement;
+    if (targetElement.classList.contains("comment__reply-btn")) {
+      const commentSection = document.createElement("div");
+      commentSection.classList.add("comment__reply");
+      commentSection.innerHTML = `
+        <img src="${comment.author.imgUrl}" alt="reply" />
+        <div class="comment__reply-input">
+          <div class="comment__reply-name">
+            <h1>${comment.author.name} ${comment.author.surname}</h1>
+            <span class="date">${date}</span>
+            <div class="comment__reply-names">
+              <img src="./src/assets/4.svg" alt="reply" />
+              <p>Максим Авдеенко</p>
+            </div>
+          </div>
+          <div class="comment__reply-space">
+            <h2>${inputCont.value}</h2>
+            <div class="comment__reply-func">
+              <div class="comment__reply-func-act">
+                <button class="comment__btn-minus">-</button>
+                <span class="comment__count">0</span>
+                <button class="comment__btn-plus">+</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
- `;
+      `;
+      commentCont.appendChild(commentSection);
+      btn.classList.remove("abled");
+      btn.classList.add("disabled");
+      inputCont.value = "";
+    }
+  });
+}
 
-  commentCont.appendChild(commentSection);
-  btn.classList.remove("abled");
-  btn.classList.add("disabled");
-  inputCont.value = "";
+function replyBtnTarget(user: CommentClass) {
+  document.addEventListener("DOMContentLoaded", () => {
+    const replyBtn = document.querySelector(".comment__reply-btn");
+    const commentInput = document.querySelector(
+      ".comment__input"
+    ) as HTMLInputElement;
+    const parentDiv = document.querySelector(
+      ".comment__other-cont"
+    ) as HTMLElement;
+    const commentBtn = document.querySelector(".comment__btn") as HTMLElement;
+
+    if (!replyBtn || !commentInput || !parentDiv || !commentBtn) {
+      console.warn(
+        "Reply button or input elements not found:",
+        replyBtn,
+        commentInput,
+        parentDiv,
+        commentBtn
+      );
+      return;
+    }
+
+    if (replyBtn && commentInput && parentDiv && commentBtn) {
+      replyBtn.addEventListener("click", () => {
+        console.log("replybtn clicked");
+        const commentDate = new Date();
+        const formattedNow = formattedDate(commentDate);
+        renderReply(user, formattedNow, commentInput, parentDiv, commentBtn);
+      });
+    }
+  });
 }
 
 function updateRatingDisplay(comment, countSpan) {
@@ -417,6 +459,7 @@ async function renderData() {
       commentCont.appendChild(commentSection);
       changeFave("#a1a1a1", comment, commentSection, comments);
       rating(comment, commentSection);
+      replyBtnTarget(user);
     }
 
     console.log(comments);
@@ -509,7 +552,7 @@ function renderComment(comment: CommentClass): HTMLElement | null {
 </div>
 <div class="comment__reply-user"></div>
             `;
-
+  replyBtnTarget(comment);
   return commentSection;
 }
 
@@ -683,6 +726,7 @@ document.addEventListener("DOMContentLoaded", function () {
   userCommenting(user);
   dropdownFilter();
   filtering();
+
   setTimeout(() => {
     localStorage.setItem("comments", JSON.stringify(comments));
     console.log(comments.length);
@@ -692,10 +736,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (commentsFromLocalStorage) {
       const commentsSaved = JSON.parse(commentsFromLocalStorage);
 
-      commentsSaved.forEach((comment) => {
-        console.log(comment);
-        renderComment(comment);
-      });
+      // commentsSaved.forEach((comment) => {
+      //   console.log(comment);
+      //   renderComment(comment);
+      // });
     }
   }, 1000);
 });
