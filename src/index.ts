@@ -30,7 +30,7 @@ class CommentClass {
   date: string;
   isFav: boolean;
 
-  replies: number;
+  replies?: number;
 
   constructor(
     text: string,
@@ -39,7 +39,7 @@ class CommentClass {
     date: string,
     isFav: boolean,
 
-    replies: number
+    replies?: number
   ) {
     this.text = text;
     this.author = author;
@@ -222,8 +222,9 @@ function renderUserComment(
         <h2>${comment.text}</h2>
         <div class="comment__other-func">
           <div class="comment__other-func-act">
-            <img class="comment__reply-btn" src="./src/assets/4.svg" alt="reply" />
-            <p>Ответить</p>
+          <button class="comment__reply-btn">
+            <img src="./src/assets/4.svg" alt="reply" />
+            <p>Ответить</p></button>            
           </div>
           <div class="comment__other-func-act">
             <svg
@@ -297,7 +298,7 @@ function renderUserComment(
   commentCont.appendChild(commentSection);
 
   changeFave("#a1a1a1", comment, commentSection, comments);
-
+  filtering();
   rating(comment, commentSection);
   localStorage.setItem("comments", JSON.stringify(comments));
 
@@ -319,81 +320,140 @@ function formattedDate(date: Date): string {
 }
 
 function renderReply(
+  user: User,
   comment: CommentClass,
   date: string,
   inputCont: HTMLInputElement,
   commentCont: HTMLElement,
   btn: HTMLElement
 ): void {
-  if (!commentCont || !inputCont || !btn) {
-    console.error("Invalid comment container", commentCont, inputCont, btn);
+  if (!commentCont) {
+    console.error("Invalid comment container", commentCont);
     return;
   }
 
-  commentCont.addEventListener("click", function (event) {
-    const targetElement = event.target as HTMLElement;
-    if (targetElement.classList.contains("comment__reply-btn")) {
-      const commentSection = document.createElement("div");
-      commentSection.classList.add("comment__reply");
-      commentSection.innerHTML = `
-        <img src="${comment.author.imgUrl}" alt="reply" />
-        <div class="comment__reply-input">
-          <div class="comment__reply-name">
-            <h1>${comment.author.name} ${comment.author.surname}</h1>
-            <span class="date">${date}</span>
-            <div class="comment__reply-names">
-              <img src="./src/assets/4.svg" alt="reply" />
-              <p>Максим Авдеенко</p>
-            </div>
-          </div>
-          <div class="comment__reply-space">
-            <h2>${inputCont.value}</h2>
-            <div class="comment__reply-func">
-              <div class="comment__reply-func-act">
-                <button class="comment__btn-minus">-</button>
-                <span class="comment__count">0</span>
-                <button class="comment__btn-plus">+</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      commentCont.appendChild(commentSection);
-      btn.classList.remove("abled");
-      btn.classList.add("disabled");
-      inputCont.value = "";
-    }
-  });
+  if (commentInput && commentBtn) {
+    commentInput.addEventListener("input", function () {
+      const span: HTMLElement | null = document.querySelector(
+        ".comment__user-input-limit"
+      );
+      if (span) {
+        const textLength = commentInput.value.length;
+        span.innerText = textLength + "/1000";
+
+        if (textLength >= 1000) {
+          span.style.color = "red";
+          commentBtn.classList.remove("abled");
+          commentBtn.classList.add("disabled");
+        } else if (textLength === 0) {
+          commentBtn.classList.remove("abled");
+          commentBtn.classList.add("disabled");
+        } else {
+          commentBtn.classList.remove("disabled");
+          commentBtn.classList.add("abled");
+          span.style.color = "#a1a1a1";
+        }
+      }
+    });
+
+    commentBtn.addEventListener("click", (event) => {
+      if (commentBtn.classList.contains("disabled")) {
+        event.preventDefault();
+        console.log("Button is disabled. Action prevented");
+      } else {
+        const commentText = commentInput.value.trim();
+        console.log(commentText);
+        if (commentText !== "") {
+          const dateUser = new Date(date);
+          const formattedDateUser = formattedDate(dateUser);
+          const newComment: CommentClass = new CommentClass(
+            commentText,
+            user,
+            0,
+            formattedDateUser,
+            false
+          );
+          const targetElement = event.target as HTMLElement;
+          if (targetElement.classList.contains("comment__reply-btn")) {
+            const commentSection = document.createElement("div");
+            commentSection.classList.add("comment__reply");
+            commentSection.innerHTML = `
+                <img src="${comment.author.imgUrl}" alt="reply" />
+                <div class="comment__reply-input">
+                  <div class="comment__reply-name">
+                    <h1>${comment.author.name} ${comment.author.surname}</h1>
+                    <span class="date">${date}</span>
+                    <div class="comment__reply-names">
+                      <img src="./src/assets/4.svg" alt="reply" />
+                      <p>Максим Авдеенко</p>
+                    </div>
+                  </div>
+                  <div class="comment__reply-space">
+                    <h2>${inputCont.value}</h2>
+                    <div class="comment__reply-func">
+                      <div class="comment__reply-func-act">
+                        <button class="comment__btn-minus">-</button>
+                        <span class="comment__count">0</span>
+                        <button class="comment__btn-plus">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+
+            targetElement.appendChild(commentSection);
+            btn.classList.remove("abled");
+            btn.classList.add("disabled");
+            inputCont.value = "";
+          }
+
+          replyBtnTarget(newComment, user);
+          comments.push(newComment);
+
+          const newDate = new Date(newComment.date);
+          console.log(newDate);
+          changeAmount();
+
+          console.log(comments);
+        }
+        console.log("Button is enabled. Performing action...");
+      }
+    });
+  }
 }
 
-function replyBtnTarget(user: CommentClass) {
+function replyBtnTarget(comment: CommentClass, user: User) {
   const commentInput = document.querySelector(
     ".comment__input"
   ) as HTMLInputElement;
   const parentDiv = document.querySelector(
     ".comment__other-cont"
   ) as HTMLElement;
-  const replyBtn = parentDiv.querySelector(".comment__reply-btn");
-  const commentBtn = document.querySelector(".comment__btn") as HTMLElement;
+  const replyBtn = parentDiv.querySelector(
+    ".comment__reply-btn"
+  ) as HTMLButtonElement;
 
-  if (!replyBtn || !commentInput || !parentDiv || !commentBtn) {
-    console.warn(
-      "Reply button or input elements not found:",
-      replyBtn,
-      commentInput,
-      parentDiv,
-      commentBtn
-    );
+  if (!replyBtn) {
+    console.error("Reply button or input elements not found:" + replyBtn);
     return;
   }
 
-  if (replyBtn && commentInput && parentDiv && commentBtn) {
+  if (replyBtn && commentBtn) {
     replyBtn.addEventListener("click", () => {
       console.log("replybtn clicked");
       const commentDate = new Date();
       const formattedNow = formattedDate(commentDate);
-      renderReply(user, formattedNow, commentInput, parentDiv, commentBtn);
+      renderReply(
+        user,
+        comment,
+        formattedNow,
+        commentInput,
+        parentDiv,
+        commentBtn
+      );
     });
+  } else {
+    console.error("Reply button event has not happened");
   }
 }
 
@@ -448,7 +508,9 @@ async function renderData() {
       false,
       0
     );
+    renderComment(comment);
     comments.push(comment);
+
     changeAmount();
 
     console.log(comment);
@@ -457,14 +519,14 @@ async function renderData() {
       commentCont.appendChild(commentSection);
       changeFave("#a1a1a1", comment, commentSection, comments);
       rating(comment, commentSection);
-      replyBtnTarget(user);
+      filtering();
     }
 
     console.log(comments);
   });
 }
 
-function renderComment(comment: CommentClass): HTMLElement | null {
+function renderComment(user: User, comment: CommentClass) {
   let commentSection = document.createElement("div");
   commentSection.classList.add("comment__other-cont");
   commentSection.innerHTML = `
@@ -550,8 +612,10 @@ function renderComment(comment: CommentClass): HTMLElement | null {
 </div>
 <div class="comment__reply-user"></div>
             `;
-  replyBtnTarget(comment);
-  return commentSection;
+  replyBtnTarget(comment, user);
+  if (commentCont) {
+    commentCont.append(commentSection);
+  }
 }
 
 function userCommenting(user) {
@@ -612,11 +676,14 @@ function userCommenting(user) {
               commentCont,
               commentBtn
             );
-            replyBtnTarget(newComment);
+
+            replyBtnTarget(newComment, user);
             comments.push(newComment);
+
             const newDate = new Date(newComment.date);
             console.log(newDate);
             changeAmount();
+
             let savedComments = localStorage.setItem(
               "comments",
               JSON.stringify(comments)
@@ -631,29 +698,30 @@ function userCommenting(user) {
   }
 }
 
-function dateFilter() {
-  if (!commentCont || !Array.isArray(comments)) {
+function dateFilter(users: CommentClass[]): void {
+  if (!commentCont || !Array.isArray(users)) {
     console.warn(
       "Invalid comment container or comments array:",
       commentCont,
-      comments
+      users
     );
     return;
   }
-  if (commentCont) {
-    comments.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
 
-      return dateB.getTime() - dateA.getTime();
-    });
-    commentCont.innerHTML = "";
-    console.log(comments + "hope it works");
-    comments.forEach((comment) => {
-      renderComment(comment);
-      console.log(comment);
-    });
-  }
+  users.sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  commentCont.innerHTML = "";
+  users.forEach((user) => {
+    renderComment(user);
+    console.log(user);
+  });
+
+  console.log(comments + "hope it works");
 }
 
 function dropdownFilter() {
@@ -702,7 +770,7 @@ function filtering() {
       const filterType = option.getAttribute("data-filter");
       if (filterType === "date") {
         console.log("date filter");
-        dateFilter();
+        dateFilter(comments);
       } else if (filterType === "rating") {
         console.log("rating");
       } else if (filterType === "replies") {
@@ -723,7 +791,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   userCommenting(user);
   dropdownFilter();
-  filtering();
 
   setTimeout(() => {
     localStorage.setItem("comments", JSON.stringify(comments));
@@ -731,13 +798,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const commentsFromLocalStorage = localStorage.getItem("comments");
 
-    if (commentsFromLocalStorage) {
-      const commentsSaved = JSON.parse(commentsFromLocalStorage);
+    // if (commentsFromLocalStorage) {
+    //   const commentsSaved = JSON.parse(commentsFromLocalStorage);
 
-      // commentsSaved.forEach((comment) => {
-      //   console.log(comment);
-      //   renderComment(comment);
-      // });
-    }
+    //   commentsSaved.forEach((comment) => {
+    //     console.log(comment);
+    //     renderComment(comment);
+    //   });
+    // }
   }, 1000);
 });

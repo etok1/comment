@@ -274,6 +274,16 @@
   color: var(--dark-grey-color);
 }
 
+.comment__reply-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: transparent;
+  font-size: 16px;
+  gap: 10px;
+  cursor: pointer;
+}
+
 .comment__user-name h1,
 .comment__other-name h1,
 .comment__reply-name h1 {
@@ -411,8 +421,8 @@
   height: 61px;
 }
 
-.comment__other-func-act button,
-.comment__reply-func-act button {
+.comment__other-func-act:last-child button,
+.comment__reply-func-act:last-child button {
   border-radius: 50%;
   width: 20px;
   height: 23px;
